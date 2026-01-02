@@ -21,39 +21,54 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1F2E),
-      body: PageView(
-        controller: store.pageController,
-        onPageChanged: store.onPageChanged,
-        children: [DashboardPage(), TagsPage(), RelatoriosPage(), PerfilPage()],
+      body: Stack(
+        children: [
+          PageView(
+            controller: store.pageController,
+            onPageChanged: store.onPageChanged,
+            children: [
+              DashboardPage(),
+              TagsPage(),
+              RelatoriosPage(),
+              PerfilPage(),
+            ],
+          ),
+          _buildFloatingBottomNavigationBar(),
+        ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  Widget _buildBottomNavigationBar() {
+  Widget _buildFloatingBottomNavigationBar() {
     return Observer(
-      builder: (_) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF252B3B),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
+      builder: (_) => Positioned(
+        left: 0,
+        right: 0,
+        bottom: 25,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF252B3B),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(icon: Icons.dashboard_outlined, index: 0),
-              _buildNavItem(icon: Icons.local_offer_outlined, index: 1),
-              _buildNavItem(icon: Icons.bar_chart_outlined, index: 2),
-              _buildNavItem(icon: Icons.person_outline, index: 3),
-            ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(icon: Icons.dashboard_outlined, index: 0),
+                _buildNavItem(icon: Icons.local_offer_outlined, index: 1),
+                _buildNavItem(icon: Icons.bar_chart_outlined, index: 2),
+                _buildNavItem(icon: Icons.person_outline, index: 3),
+              ],
+            ),
           ),
         ),
       ),
@@ -65,15 +80,15 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () => store.setCurrentIndex(index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF2196F3) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           color: isSelected ? Colors.white : Colors.white54,
-          size: 28,
+          size: 26,
         ),
       ),
     );

@@ -49,6 +49,42 @@ class DashboardRepository implements IDashboardRepository {
         icone: 'attach_money',
         data: DateTime.now().subtract(const Duration(days: 5)),
       ),
+      TransacaoEntity(
+        id: '4',
+        titulo: 'Corte de cabelo',
+        categoria: 'Estética',
+        valor: 30.00,
+        isDespesa: true,
+        icone: 'attach_money',
+        data: DateTime.now().subtract(const Duration(days: 5)),
+      ),
+      TransacaoEntity(
+        id: '5',
+        titulo: 'Lanche Dayton',
+        categoria: 'Comida',
+        valor: 80.00,
+        isDespesa: true,
+        icone: 'shopping_cart',
+        data: DateTime.now().subtract(const Duration(days: 5)),
+      ),
+      TransacaoEntity(
+        id: '6',
+        titulo: 'Lanche Boi nos Ares',
+        categoria: 'Comida',
+        valor: 80.00,
+        isDespesa: true,
+        icone: 'shopping_cart',
+        data: DateTime.now().subtract(const Duration(days: 5)),
+      ),
+      TransacaoEntity(
+        id: '7',
+        titulo: 'Lanche Kiki',
+        categoria: 'Comida',
+        valor: 50.00,
+        isDespesa: true,
+        icone: 'shopping_cart',
+        data: DateTime.now().subtract(const Duration(days: 5)),
+      ),
     ];
   }
 

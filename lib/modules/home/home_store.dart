@@ -15,11 +15,7 @@ abstract class HomeStoreBase with Store {
   @action
   void setCurrentIndex(int index) {
     currentIndex = index;
-    pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    pageController.jumpToPage(index);
   }
 
   @action
