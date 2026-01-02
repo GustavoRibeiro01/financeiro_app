@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import '../dashboard/dashboard_page.dart';
+import '../dashboard/presentation/pages/dashboard_page.dart';
 import '../tags/tags_page.dart';
 import '../relatorios/relatorios_page.dart';
 import '../perfil/perfil_page.dart';
@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
           color: const Color(0xFF252B3B),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),

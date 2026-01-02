@@ -28,13 +28,13 @@ class PerfilPage extends StatelessWidget {
                     Icon(
                       Icons.person_outline,
                       size: 80,
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Página de Perfil',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 18,
                       ),
                     ),
@@ -42,7 +42,7 @@ class PerfilPage extends StatelessWidget {
                     Text(
                       'Em desenvolvimento',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         fontSize: 14,
                       ),
                     ),

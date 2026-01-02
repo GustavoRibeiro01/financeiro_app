@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'dashboard_store.dart';
+import '../stores/dashboard_store.dart';
+import '../../domain/entities/transacao_entity.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -179,7 +180,7 @@ class _DashboardPageState extends State<DashboardPage> {
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
                 value: store.percentualMeta / 100,
-                backgroundColor: Colors.white.withOpacity(0.1),
+                backgroundColor: Colors.white.withValues(alpha: 0.1),
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                 minHeight: 8,
               ),
@@ -231,7 +232,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -258,65 +259,58 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildTransacoesRecentes() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Transações Recentes',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    return Observer(
+      builder: (_) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Transações Recentes',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Ver todas',
+                style: TextStyle(color: Colors.blue, fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (store.carregando)
+            const Center(child: CircularProgressIndicator())
+          else
+            ...store.transacoes.map(
+              (transacao) => Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: _buildTransactionItem(transacao),
               ),
             ),
-            Text(
-              'Ver todas',
-              style: TextStyle(color: Colors.blue, fontSize: 14),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildTransactionItem(
-          'Supermercado',
-          'Alimentação',
-          'R\$ 235,80',
-          true,
-          Icons.shopping_cart,
-          Colors.orange,
-        ),
-        const SizedBox(height: 12),
-        _buildTransactionItem(
-          'Netflix',
-          'Entretenimento',
-          'R\$ 39,90',
-          true,
-          Icons.movie,
-          Colors.red,
-        ),
-        const SizedBox(height: 12),
-        _buildTransactionItem(
-          'Salário',
-          'Receita',
-          'R\$ 4.250,00',
-          false,
-          Icons.attach_money,
-          Colors.green,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildTransactionItem(
-    String title,
-    String category,
-    String value,
-    bool isExpense,
-    IconData icon,
-    Color iconColor,
-  ) {
+  Widget _buildTransactionItem(TransacaoEntity transacao) {
+    final iconeMap = {
+      'shopping_cart': Icons.shopping_cart,
+      'movie': Icons.movie,
+      'attach_money': Icons.attach_money,
+    };
+
+    final corMap = {
+      'shopping_cart': Colors.orange,
+      'movie': Colors.red,
+      'attach_money': Colors.green,
+    };
+
+    final icone = iconeMap[transacao.icone] ?? Icons.help_outline;
+    final cor = corMap[transacao.icone] ?? Colors.grey;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -328,10 +322,10 @@ class _DashboardPageState extends State<DashboardPage> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.2),
+              color: cor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(icone, color: cor, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -339,7 +333,7 @@ class _DashboardPageState extends State<DashboardPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  transacao.titulo,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -348,16 +342,16 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  category,
+                  transacao.categoria,
                   style: const TextStyle(color: Colors.white54, fontSize: 12),
                 ),
               ],
             ),
           ),
           Text(
-            value,
+            'R\$ ${transacao.valor.toStringAsFixed(2)}',
             style: TextStyle(
-              color: isExpense ? Colors.red : Colors.green,
+              color: transacao.isDespesa ? Colors.red : Colors.green,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
