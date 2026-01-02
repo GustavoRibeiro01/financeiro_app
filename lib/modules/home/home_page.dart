@@ -33,39 +33,47 @@ class _HomePageState extends State<HomePage> {
   Widget _buildBottomNavigationBar() {
     return Observer(
       builder: (_) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: const Color(0xFF252B3B),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 10,
+              blurRadius: 20,
               offset: const Offset(0, -5),
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: store.currentIndex,
-          onTap: store.setCurrentIndex,
-          backgroundColor: Colors.transparent,
-          selectedItemColor: Colors.blue,
-          unselectedItemColor: Colors.white54,
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard),
-              label: 'Visão Geral',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.local_offer),
-              label: 'Tags',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart),
-              label: 'Relatórios',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-          ],
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(icon: Icons.dashboard_outlined, index: 0),
+              _buildNavItem(icon: Icons.local_offer_outlined, index: 1),
+              _buildNavItem(icon: Icons.bar_chart_outlined, index: 2),
+              _buildNavItem(icon: Icons.person_outline, index: 3),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({required IconData icon, required int index}) {
+    final isSelected = store.currentIndex == index;
+    return GestureDetector(
+      onTap: () => store.setCurrentIndex(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2196F3) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Icon(
+          icon,
+          color: isSelected ? Colors.white : Colors.white54,
+          size: 28,
         ),
       ),
     );
