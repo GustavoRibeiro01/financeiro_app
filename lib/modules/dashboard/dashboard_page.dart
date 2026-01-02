@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'dashboard_store.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -8,7 +10,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  bool _saldoVisivel = true;
+  final DashboardStore store = DashboardStore();
 
   @override
   Widget build(BuildContext context) {
@@ -104,27 +106,31 @@ class _DashboardPageState extends State<DashboardPage> {
                 'Saldo Total',
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
-              IconButton(
-                icon: Icon(
-                  _saldoVisivel ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.white70,
-                  size: 20,
+              Observer(
+                builder: (_) => IconButton(
+                  icon: Icon(
+                    store.saldoVisivel
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
+                  onPressed: store.toggleSaldoVisibilidade,
                 ),
-                onPressed: () {
-                  setState(() {
-                    _saldoVisivel = !_saldoVisivel;
-                  });
-                },
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            _saldoVisivel ? 'R\$ 8.429,50' : '••••••',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+          Observer(
+            builder: (_) => Text(
+              store.saldoVisivel
+                  ? 'R\$ ${store.saldoTotal.toStringAsFixed(2)}'
+                  : '••••••',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -139,35 +145,43 @@ class _DashboardPageState extends State<DashboardPage> {
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      _saldoVisivel ? 'R\$ 13.000,00' : '••••••',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                    Observer(
+                      builder: (_) => Text(
+                        store.saldoVisivel
+                            ? 'R\$ ${store.metaMensal.toStringAsFixed(2)}'
+                            : '••••••',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const Text(
-                '65%',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Observer(
+                builder: (_) => Text(
+                  '${store.percentualMeta.toStringAsFixed(0)}%',
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: 0.65,
-              backgroundColor: Colors.white.withOpacity(0.1),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-              minHeight: 8,
+          Observer(
+            builder: (_) => ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: store.percentualMeta / 100,
+                backgroundColor: Colors.white.withOpacity(0.1),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                minHeight: 8,
+              ),
             ),
           ),
         ],
@@ -176,26 +190,28 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildEntradasSaidas() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildCard(
-            'Entradas',
-            'R\$ 4.250,00',
-            Icons.arrow_downward,
-            Colors.green,
+    return Observer(
+      builder: (_) => Row(
+        children: [
+          Expanded(
+            child: _buildCard(
+              'Entradas',
+              'R\$ ${store.entradas.toStringAsFixed(2)}',
+              Icons.arrow_downward,
+              Colors.green,
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildCard(
-            'Saídas',
-            'R\$ 1.820,50',
-            Icons.arrow_upward,
-            Colors.red,
+          const SizedBox(width: 16),
+          Expanded(
+            child: _buildCard(
+              'Saídas',
+              'R\$ ${store.saidas.toStringAsFixed(2)}',
+              Icons.arrow_upward,
+              Colors.red,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
