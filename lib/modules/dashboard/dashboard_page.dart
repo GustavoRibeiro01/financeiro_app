@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'dashboard_store.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -10,7 +11,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  final DashboardStore store = DashboardStore();
+  final DashboardStore store = Modular.get<DashboardStore>();
 
   @override
   Widget build(BuildContext context) {

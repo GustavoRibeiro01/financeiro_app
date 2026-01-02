@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import '../dashboard/dashboard_page.dart';
 import '../tags/tags_page.dart';
 import '../relatorios/relatorios_page.dart';
@@ -14,13 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final HomeStore store = HomeStore();
-
-  @override
-  void dispose() {
-    store.dispose();
-    super.dispose();
-  }
+  final HomeStore store = Modular.get<HomeStore>();
 
   @override
   Widget build(BuildContext context) {
