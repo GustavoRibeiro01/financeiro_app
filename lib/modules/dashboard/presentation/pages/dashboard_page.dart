@@ -30,6 +30,7 @@ class _DashboardPageState extends State<DashboardPage> {
               _buildEntradasSaidas(),
               const SizedBox(height: 30),
               _buildTransacoesRecentes(),
+              const SizedBox(height: 60),
             ],
           ),
         ),
@@ -78,9 +79,14 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
+          Observer(
+            builder: (_) => IconButton(
+              icon: Icon(
+                store.saldoVisivel ? Icons.visibility : Icons.visibility_off,
+                color: Colors.white,
+              ),
+              onPressed: store.toggleSaldoVisibilidade,
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.white),
@@ -101,26 +107,9 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Saldo Total',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              Observer(
-                builder: (_) => IconButton(
-                  icon: Icon(
-                    store.saldoVisivel
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: Colors.white70,
-                    size: 20,
-                  ),
-                  onPressed: store.toggleSaldoVisibilidade,
-                ),
-              ),
-            ],
+          const Text(
+            'Saldo Total',
+            style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 8),
           Observer(
@@ -198,7 +187,9 @@ class _DashboardPageState extends State<DashboardPage> {
           Expanded(
             child: _buildCard(
               'Entradas',
-              'R\$ ${store.entradas.toStringAsFixed(2)}',
+              store.saldoVisivel
+                  ? 'R\$ ${store.entradas.toStringAsFixed(2)}'
+                  : '••••••',
               Icons.arrow_downward,
               Colors.green,
             ),
@@ -207,7 +198,9 @@ class _DashboardPageState extends State<DashboardPage> {
           Expanded(
             child: _buildCard(
               'Saídas',
-              'R\$ ${store.saidas.toStringAsFixed(2)}',
+              store.saldoVisivel
+                  ? 'R\$ ${store.saidas.toStringAsFixed(2)}'
+                  : '••••••',
               Icons.arrow_upward,
               Colors.red,
             ),
