@@ -1,38 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import '../stores/login_store.dart';
 import '../stores/auth_store.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final AuthStore store = Modular.get<AuthStore>();
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final store = Modular.get<LoginStore>();
+    final authStore = Modular.get<AuthStore>();
+    final formKey = GlobalKey<FormState>();
+
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Form(
-              key: _formKey,
+              key: formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -53,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   // Campo de email
                   TextFormField(
-                    controller: _emailController,
+                    controller: store.emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       labelText: 'Email',
@@ -73,35 +60,33 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 16),
 
                   // Campo de senha
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Senha',
-                      prefixIcon: const Icon(Icons.lock),
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                  Observer(
+                    builder: (_) => TextFormField(
+                      controller: store.passwordController,
+                      obscureText: store.obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        prefixIcon: const Icon(Icons.lock),
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            store.obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: store.togglePasswordVisibility,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, insira sua senha';
+                        }
+                        if (value.length < 6) {
+                          return 'A senha deve ter pelo menos 6 caracteres';
+                        }
+                        return null;
+                      },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira sua senha';
-                      }
-                      if (value.length < 6) {
-                        return 'A senha deve ter pelo menos 6 caracteres';
-                      }
-                      return null;
-                    },
                   ),
                   const SizedBox(height: 8),
 
@@ -125,7 +110,14 @@ class _LoginPageState extends State<LoginPage> {
                       }
 
                       return ElevatedButton(
-                        onPressed: _handleLogin,
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            final success = await store.signIn();
+                            if (success && authStore.isAuthenticated) {
+                              Modular.to.navigate('/home/');
+                            }
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
@@ -152,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
 
-                  // Mensagem de erro
+                  // Mensagens de erro/sucesso
                   Observer(
                     builder: (_) {
                       if (store.errorMessage != null) {
@@ -174,7 +166,30 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.close),
-                                    onPressed: () => store.clearError(),
+                                    onPressed: store.clearMessages,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      if (store.successMessage != null) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Card(
+                            color: Colors.green.shade100,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.check_circle, color: Colors.green),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      store.successMessage!,
+                                      style: const TextStyle(color: Colors.green),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -192,18 +207,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      await store.signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-
-      if (store.isAuthenticated && mounted) {
-        Modular.to.navigate('/home/');
-      }
-    }
   }
 }

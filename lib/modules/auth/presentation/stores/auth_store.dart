@@ -1,19 +1,36 @@
 import 'package:mobx/mobx.dart';
-import '../../domain/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../domain/repositories/i_auth_repository.dart';
+import '../../domain/usecases/sign_out_usecase.dart';
+import '../../domain/usecases/reload_user_usecase.dart';
+import '../../domain/usecases/delete_user_usecase.dart';
+import '../../domain/usecases/send_email_verification_usecase.dart';
 
 part 'auth_store.g.dart';
 
+/// Store principal do módulo de autenticação
+/// Responsável por gerenciar o estado global de autenticação
 class AuthStore = _AuthStoreBase with _$AuthStore;
 
 abstract class _AuthStoreBase with Store {
-  final AuthService _authService;
+  final IAuthRepository _repository;
+  final SignOutUseCase _signOutUseCase;
+  final ReloadUserUseCase _reloadUserUseCase;
+  final DeleteUserUseCase _deleteUserUseCase;
+  final SendEmailVerificationUseCase _sendEmailVerificationUseCase;
 
-  _AuthStoreBase(this._authService) {
+  _AuthStoreBase(
+    this._repository,
+    this._signOutUseCase,
+    this._reloadUserUseCase,
+    this._deleteUserUseCase,
+    this._sendEmailVerificationUseCase,
+  ) {
     // Observa mudanças no estado de autenticação
-    _authService.authStateChanges.listen((User? user) {
+    _repository.authStateChanges.listen((User? user) {
       currentUser = user;
       isAuthenticated = user != null;
+      isEmailVerified = user?.emailVerified ?? false;
     });
   }
 
@@ -24,70 +41,50 @@ abstract class _AuthStoreBase with Store {
   bool isAuthenticated = false;
 
   @observable
+  bool isEmailVerified = false;
+
+  @observable
   bool isLoading = false;
 
   @observable
   String? errorMessage;
 
-  @action
-  Future<void> signIn({required String email, required String password}) async {
-    isLoading = true;
-    errorMessage = null;
-
-    try {
-      await _authService.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } catch (e) {
-      errorMessage = e.toString();
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  @action
-  Future<void> signUp({required String email, required String password}) async {
-    isLoading = true;
-    errorMessage = null;
-
-    try {
-      await _authService.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      // Enviar email de verificação automaticamente
-      await _authService.sendEmailVerification();
-    } catch (e) {
-      errorMessage = e.toString();
-    } finally {
-      isLoading = false;
-    }
-  }
-
+  // Ações principais de autenticação
   @action
   Future<void> signOut() async {
     isLoading = true;
     errorMessage = null;
 
     try {
-      await _authService.signOut();
+      await _signOutUseCase();
     } catch (e) {
-      errorMessage = e.toString();
+      errorMessage = 'Erro ao fazer logout: ${e.toString()}';
     } finally {
       isLoading = false;
     }
   }
 
   @action
-  Future<void> resetPassword({required String email}) async {
+  Future<void> reloadUser() async {
+    try {
+      await _reloadUserUseCase();
+      final user = _repository.currentUser;
+      currentUser = user;
+      isEmailVerified = user?.emailVerified ?? false;
+    } catch (e) {
+      errorMessage = 'Erro ao recarregar usuário: ${e.toString()}';
+    }
+  }
+
+  @action
+  Future<void> deleteAccount() async {
     isLoading = true;
     errorMessage = null;
 
     try {
-      await _authService.sendPasswordResetEmail(email: email);
+      await _deleteUserUseCase();
     } catch (e) {
-      errorMessage = e.toString();
+      errorMessage = 'Erro ao deletar conta: ${e.toString()}';
     } finally {
       isLoading = false;
     }
@@ -99,9 +96,10 @@ abstract class _AuthStoreBase with Store {
     errorMessage = null;
 
     try {
-      await _authService.sendEmailVerification();
+      await _sendEmailVerificationUseCase();
+      await reloadUser();
     } catch (e) {
-      errorMessage = e.toString();
+      errorMessage = 'Erro ao enviar email de verificação: ${e.toString()}';
     } finally {
       isLoading = false;
     }
@@ -111,4 +109,17 @@ abstract class _AuthStoreBase with Store {
   void clearError() {
     errorMessage = null;
   }
+
+  // Computed values
+  @computed
+  String? get userEmail => currentUser?.email;
+
+  @computed
+  String? get userId => currentUser?.uid;
+
+  @computed
+  String? get userName => currentUser?.displayName;
+
+  @computed
+  bool get needsEmailVerification => isAuthenticated && !isEmailVerified;
 }

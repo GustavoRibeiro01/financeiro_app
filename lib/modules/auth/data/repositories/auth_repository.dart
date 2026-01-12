@@ -1,21 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../domain/repositories/i_auth_repository.dart';
 
-class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+class AuthRepository implements IAuthRepository {
+  final FirebaseAuth _firebaseAuth;
 
-  // Stream de mudanças no estado de autenticação
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  AuthRepository(this._firebaseAuth);
 
-  // Usuário atual
-  User? get currentUser => _auth.currentUser;
+  @override
+  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
-  // Login com email e senha
+  @override
+  User? get currentUser => _firebaseAuth.currentUser;
+
+  @override
   Future<UserCredential> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      return await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -24,13 +27,13 @@ class AuthService {
     }
   }
 
-  // Registro com email e senha
+  @override
   Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      return await _auth.createUserWithEmailAndPassword(
+      return await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -39,42 +42,47 @@ class AuthService {
     }
   }
 
-  // Enviar email de verificação
+  @override
   Future<void> sendEmailVerification() async {
     try {
-      await _auth.currentUser?.sendEmailVerification();
+      await _firebaseAuth.currentUser?.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  // Resetar senha
+  @override
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  // Logout
+  @override
   Future<void> signOut() async {
-    await _auth.signOut();
+    await _firebaseAuth.signOut();
   }
 
-  // Deletar conta
-  Future<void> deleteAccount() async {
+  @override
+  Future<void> reloadUser() async {
+    await _firebaseAuth.currentUser?.reload();
+  }
+
+  @override
+  Future<void> deleteUser() async {
     try {
-      await _auth.currentUser?.delete();
+      await _firebaseAuth.currentUser?.delete();
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  // Atualizar perfil
+  @override
   Future<void> updateProfile({String? displayName, String? photoURL}) async {
     try {
-      await _auth.currentUser?.updateProfile(
+      await _firebaseAuth.currentUser?.updateProfile(
         displayName: displayName,
         photoURL: photoURL,
       );
@@ -83,7 +91,7 @@ class AuthService {
     }
   }
 
-  // Reautenticar usuário
+  @override
   Future<void> reauthenticateWithCredential({
     required String email,
     required String password,
@@ -93,31 +101,30 @@ class AuthService {
         email: email,
         password: password,
       );
-      await _auth.currentUser?.reauthenticateWithCredential(credential);
+      await _firebaseAuth.currentUser?.reauthenticateWithCredential(credential);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  // Atualizar email
+  @override
   Future<void> updateEmail({required String newEmail}) async {
     try {
-      await _auth.currentUser?.verifyBeforeUpdateEmail(newEmail);
+      await _firebaseAuth.currentUser?.verifyBeforeUpdateEmail(newEmail);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  // Atualizar senha
+  @override
   Future<void> updatePassword({required String newPassword}) async {
     try {
-      await _auth.currentUser?.updatePassword(newPassword);
+      await _firebaseAuth.currentUser?.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  // Tratamento de erros
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'weak-password':
