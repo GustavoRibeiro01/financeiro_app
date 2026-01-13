@@ -53,21 +53,25 @@ abstract class _RegisterStoreBase with Store {
     successMessage = null;
     emailVerificationSent = false;
 
-    try {
-      await _signUpUseCase(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-      );
-      
-      emailVerificationSent = true;
-      successMessage = 'Conta criada com sucesso! Verifique seu email.';
-      return true;
-    } catch (e) {
-      errorMessage = _getErrorMessage(e);
-      return false;
-    } finally {
-      isLoading = false;
-    }
+    final result = await _signUpUseCase(
+      email: emailController.text.trim(),
+      password: passwordController.text,
+      confirmPassword: confirmPasswordController.text,
+    );
+
+    return result.fold(
+      (failure) {
+        isLoading = false;
+        errorMessage = failure.message;
+        return false;
+      },
+      (credential) {
+        isLoading = false;
+        emailVerificationSent = true;
+        successMessage = 'Conta criada com sucesso! Verifique seu email.';
+        return true;
+      },
+    );
   }
 
   @action
@@ -76,14 +80,18 @@ abstract class _RegisterStoreBase with Store {
     errorMessage = null;
     successMessage = null;
 
-    try {
-      await _sendEmailVerificationUseCase();
-      successMessage = 'Email de verificação reenviado!';
-    } catch (e) {
-      errorMessage = _getErrorMessage(e);
-    } finally {
-      isLoading = false;
-    }
+    final result = await _sendEmailVerificationUseCase();
+
+    result.fold(
+      (failure) {
+        isLoading = false;
+        errorMessage = failure.message;
+      },
+      (_) {
+        isLoading = false;
+        successMessage = 'Email de verificação reenviado!';
+      },
+    );
   }
 
   @action
@@ -96,21 +104,5 @@ abstract class _RegisterStoreBase with Store {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-  }
-
-  String _getErrorMessage(dynamic error) {
-    final errorString = error.toString();
-    
-    if (errorString.contains('email-already-in-use')) {
-      return 'Este email já está em uso';
-    } else if (errorString.contains('invalid-email')) {
-      return 'Email inválido';
-    } else if (errorString.contains('weak-password')) {
-      return 'Senha muito fraca. Use pelo menos 6 caracteres';
-    } else if (errorString.contains('operation-not-allowed')) {
-      return 'Operação não permitida';
-    } else {
-      return 'Erro ao criar conta: $errorString';
-    }
   }
 }

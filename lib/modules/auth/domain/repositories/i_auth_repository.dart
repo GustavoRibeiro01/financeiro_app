@@ -1,30 +1,32 @@
+import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../errors/auth_failures.dart';
 
 /// Interface do repositório de autenticação
 abstract class IAuthRepository {
   Stream<User?> get authStateChanges;
   User? get currentUser;
   
-  Future<UserCredential> signInWithEmailAndPassword({
+  Future<Either<AuthFailure, UserCredential>> signInWithEmailAndPassword({
     required String email,
     required String password,
   });
   
-  Future<UserCredential> createUserWithEmailAndPassword({
+  Future<Either<AuthFailure, UserCredential>> createUserWithEmailAndPassword({
     required String email,
     required String password,
   });
   
-  Future<void> sendEmailVerification();
-  Future<void> sendPasswordResetEmail({required String email});
-  Future<void> signOut();
-  Future<void> reloadUser();
-  Future<void> deleteUser();
-  Future<void> updateProfile({String? displayName, String? photoURL});
-  Future<void> reauthenticateWithCredential({
+  Future<Either<AuthFailure, Unit>> sendEmailVerification();
+  Future<Either<AuthFailure, Unit>> sendPasswordResetEmail({required String email});
+  Future<Either<AuthFailure, Unit>> signOut();
+  Future<Either<AuthFailure, Unit>> reloadUser();
+  Future<Either<AuthFailure, Unit>> deleteUser();
+  Future<Either<AuthFailure, Unit>> updateProfile({String? displayName, String? photoURL});
+  Future<Either<AuthFailure, Unit>> reauthenticateWithCredential({
     required String email,
     required String password,
   });
-  Future<void> updateEmail({required String newEmail});
-  Future<void> updatePassword({required String newPassword});
+  Future<Either<AuthFailure, Unit>> updateEmail({required String newEmail});
+  Future<Either<AuthFailure, Unit>> updatePassword({required String newPassword});
 }

@@ -32,17 +32,21 @@ abstract class _ForgotPasswordStoreBase with Store {
     errorMessage = null;
     successMessage = null;
 
-    try {
-      await _resetPasswordUseCase(email: emailController.text.trim());
-      emailSent = true;
-      successMessage = 'Email de recuperação enviado com sucesso!';
-      return true;
-    } catch (e) {
-      errorMessage = _getErrorMessage(e);
-      return false;
-    } finally {
-      isLoading = false;
-    }
+    final result = await _resetPasswordUseCase(email: emailController.text.trim());
+
+    return result.fold(
+      (failure) {
+        isLoading = false;
+        errorMessage = failure.message;
+        return false;
+      },
+      (_) {
+        isLoading = false;
+        emailSent = true;
+        successMessage = 'Email de recuperação enviado com sucesso!';
+        return true;
+      },
+    );
   }
 
   @action
@@ -61,19 +65,5 @@ abstract class _ForgotPasswordStoreBase with Store {
 
   void dispose() {
     emailController.dispose();
-  }
-
-  String _getErrorMessage(dynamic error) {
-    final errorString = error.toString();
-    
-    if (errorString.contains('user-not-found')) {
-      return 'Usuário não encontrado';
-    } else if (errorString.contains('invalid-email')) {
-      return 'Email inválido';
-    } else if (errorString.contains('too-many-requests')) {
-      return 'Muitas tentativas. Tente novamente mais tarde';
-    } else {
-      return 'Erro ao enviar email: $errorString';
-    }
   }
 }

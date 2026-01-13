@@ -37,6 +37,7 @@ dependencies:
   flutter_modular: ^6.4.1
   mobx: ^2.5.0
   flutter_mobx: ^2.3.0
+  dartz: ^0.10.1
   
   # Firebase
   firebase_core: ^3.8.1

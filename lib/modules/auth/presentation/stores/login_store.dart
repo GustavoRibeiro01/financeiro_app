@@ -38,19 +38,23 @@ abstract class _LoginStoreBase with Store {
     errorMessage = null;
     successMessage = null;
 
-    try {
-      await _signInUseCase(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-      );
-      successMessage = 'Login realizado com sucesso!';
-      return true;
-    } catch (e) {
-      errorMessage = _getErrorMessage(e);
-      return false;
-    } finally {
-      isLoading = false;
-    }
+    final result = await _signInUseCase(
+      email: emailController.text.trim(),
+      password: passwordController.text,
+    );
+
+    return result.fold(
+      (failure) {
+        isLoading = false;
+        errorMessage = failure.message;
+        return false;
+      },
+      (credential) {
+        isLoading = false;
+        successMessage = 'Login realizado com sucesso!';
+        return true;
+      },
+    );
   }
 
   @action
@@ -62,23 +66,5 @@ abstract class _LoginStoreBase with Store {
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
-  }
-
-  String _getErrorMessage(dynamic error) {
-    final errorString = error.toString();
-    
-    if (errorString.contains('user-not-found')) {
-      return 'Usuário não encontrado';
-    } else if (errorString.contains('wrong-password')) {
-      return 'Senha incorreta';
-    } else if (errorString.contains('invalid-email')) {
-      return 'Email inválido';
-    } else if (errorString.contains('user-disabled')) {
-      return 'Usuário desabilitado';
-    } else if (errorString.contains('too-many-requests')) {
-      return 'Muitas tentativas. Tente novamente mais tarde';
-    } else {
-      return 'Erro ao fazer login: $errorString';
-    }
   }
 }
