@@ -4,8 +4,14 @@ import '../modules/home/home_module.dart';
 import 'guards/auth_guard.dart';
 
 class AppModule extends Module {
+
+  @override
+  List<Module> get imports => [AuthModule()];
+
+
   @override
   void binds(Injector i) {
+    
     // Registre aqui os binds globais da aplicação
     // Exemplo: i.addSingleton(() => ApiService());
   }
