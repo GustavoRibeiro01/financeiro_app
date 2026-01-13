@@ -64,6 +64,9 @@ class RequiresRecentLoginFailure extends AuthFailure {
   const RequiresRecentLoginFailure() : super('Esta operação requer autenticação recente');
 }
 
+class InvalidCredentialFailure extends AuthFailure {
+  const InvalidCredentialFailure() : super('Credenciais inválidas');
+}
 // ===== Falhas de Rede e Servidor =====
 
 class NetworkFailure extends AuthFailure {

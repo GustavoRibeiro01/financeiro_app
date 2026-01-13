@@ -186,6 +186,8 @@ class AuthRepository implements IAuthRepository {
         return const RequiresRecentLoginFailure();
       case 'network-request-failed':
         return const NetworkFailure();
+      case 'invalid-credential':
+        return const InvalidCredentialFailure();
       default:
         return ServerFailure(e.message);
     }
